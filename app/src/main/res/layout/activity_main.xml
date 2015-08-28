@@ -1,0 +1,49 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/reader_book_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/abc_control_padding_material">
+
+        <TextView
+            android:id="@+id/reader_chapter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center_horizontal"
+            android:paddingLeft="@dimen/abc_control_padding_material"
+            android:paddingRight="@dimen/abc_control_padding_material"
+            android:text="1000/5000" />
+
+        <TextView
+            android:id="@+id/reader_power"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="end"
+            android:paddingLeft="@dimen/abc_control_padding_material"
+            android:paddingRight="@dimen/abc_control_padding_material"
+            android:text="99%" />
+
+        <TextView
+            android:id="@+id/reader_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_toLeftOf="@id/reader_power"
+            android:layout_toStartOf="@id/reader_power"
+            android:paddingLeft="@dimen/abc_control_padding_material"
+            android:paddingRight="@dimen/abc_control_padding_material"
+            android:text="16:08" />
+    </RelativeLayout>
+</RelativeLayout>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.vcokey.xs8reader.reader.widget.TxtPage
+        android:id="@+id/book_pager_text"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingTop="18dp"
+        android:paddingRight="16dp"
+        android:paddingLeft="16dp"/>
+
+    <TextView
+        android:id="@+id/book_pager_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:padding="@dimen/abc_control_padding_material"
+        android:textSize="@dimen/abc_text_size_caption_material"
+        android:text="1.大哥啊顺利打开附件" />
+</LinearLayout>
