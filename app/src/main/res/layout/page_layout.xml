@@ -7,6 +7,7 @@
 
     <com.vcokey.xs8reader.reader.widget.TxtPage
         android:id="@+id/book_pager_text"
+        android:textIsSelectable="true"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -15,6 +16,7 @@
         android:paddingLeft="16dp"/>
 
     <TextView
+
         android:id="@+id/book_pager_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

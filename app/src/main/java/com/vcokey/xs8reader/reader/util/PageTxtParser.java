@@ -1,12 +1,13 @@
 package com.vcokey.xs8reader.reader.util;
 
 import android.graphics.Paint;
-import android.util.Log;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * 文本排版解析器
+ *
  * Created by vcokey on 2015/8/28.
  */
 public class PageTxtParser {
@@ -21,8 +22,8 @@ public class PageTxtParser {
      * @return 页面最大行数，不计算半行
      */
     public static int parseMaxLineCount(Paint paint, int height, float spacingMult, float spacingAdd) {
-        int textHeight = 0;
-        float lineHeight = 0;
+        int textHeight;
+        float lineHeight;
         Paint.FontMetricsInt fm = paint.getFontMetricsInt();
         textHeight = Math.abs(fm.ascent) + Math.abs(fm.descent) + Math.abs(fm.leading);
 
@@ -32,18 +33,28 @@ public class PageTxtParser {
     }
 
     /**
-     * 解析获取每页可显示的字符串
+     * 解析获取每页可显示的字符串，处理回车/换行算一行<br/>
+     * TODO - 未处理长单词，中间加连词符 <br/>
      *
-     * @param paint
-     * @param text
-     * @param width
+     * ps:长单词的几种情况--<br/>
+     * <li>1.|-------123456|    长数字</li>
+     * <li>2.|-------abcdef|    长英文单词</li>
+     * <li>3.|-------123abc|    先数字 后字母</li>
+     * <li>4.|-------abc123|    先字母 后数字</li>
+     * <li>5.|------------a|    长单词只有一个字符在上一行末尾</li>
+     *
+     * @param paint 画笔
+     * @param text  文本
+     * @param width 行宽
+     * @param lineCount 行数
+     *
      * @return 每页的字符串
      */
     public static String parsePager(Paint paint, String text, int width, int lineCount) {
         StringBuffer sb = new StringBuffer();
         int lastCharacterCount;
         int position = 0;
-        Pattern pattern = Pattern.compile("[\n\r]+");
+        Pattern pattern = Pattern.compile("[\r\n]+");
         for (int i = 0; i < lineCount; i++) {
             lastCharacterCount = paint.breakText(text, position,
                     text.length(), true, width, null);

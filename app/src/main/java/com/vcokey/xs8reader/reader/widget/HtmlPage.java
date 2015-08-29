@@ -11,7 +11,7 @@ import android.view.View;
  * <p/>
  * Created by vcokey on 2015/8/27.
  *
- * @LICENCSE CC BY 4.0
+ * @LICENCSE Apache License Version 2.0
  */
 public class HtmlPage extends View{
 
