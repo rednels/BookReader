@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         mBookPager = (ViewPager) findViewById(R.id.reader_book_pager);
         for (int i = 0; i< 20; i++){
             sb.append("asdfsdfa")
-                    .append("阿斯蒂芬阿斯蒂芬阿斯顿f阿斯蒂芬asdfsdfa阿斯蒂芬阿斯顿f阿斯蒂芬阿斯蒂芬阿斯顿f")
+                    .append("阿斯蒂發你是誰蒂芬阿斯顿f阿斯蒂芬asdfsdfa阿斯蒂芬阿斯顿f阿斯蒂芬阿斯蒂芬阿斯顿f")
                     .append("\n");
         }
 

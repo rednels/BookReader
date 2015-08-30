@@ -68,7 +68,7 @@ public class TxtPage extends View {
         Log.d(TAG, "TxtPage init");
         mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setStyle(Paint.Style.FILL);
-
+        mTextPaint.setTypeface(Typeface.createFromAsset(getContext().getAssets(),"fonts/osp.ttf"));
     }
 
     float dx = 0, dy = 0;
