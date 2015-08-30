@@ -21,8 +21,10 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.vcokey.xs8reader.reader.util.PageTxtParser;
+import com.vcokey.xs8reader.reader.util.RectUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Txt reader widget,not support rich text.
@@ -102,17 +104,22 @@ public class TxtPage extends View {
 //        float a = layout.getPrimaryHorizontal(1);           //获取字符串中第N个字符的左边界坐标
 //        float c = layout.getSecondaryHorizontal(10);        //获取字符串中第N个字符的右边界坐标
 
-        int line = layout.getLineForVertical((int) rectF.bottom);
+        for (int[] line : lines) {
+            // TODO: 2015/8/30 依次循环画下划线，layout需提前渲染
+        }
 
-        int bottom = layout.getLineBaseline(line);
-        int decent = layout.getLineDescent(line);
-        int left = layout.getOffsetForHorizontal(line, rectF.left);
-        int right = layout.getOffsetForHorizontal(line, rectF.right);
 
-        float leftX = layout.getPrimaryHorizontal(left);
-        float rightX = layout.getPrimaryHorizontal(right + 1);
-        System.out.println(String.format("%s,%s,%s",line,left,right));
-        canvas.drawLine(leftX, bottom + decent / 2, rightX, bottom + decent / 2, mTextPaint);
+//        int line = layout.getLineForVertical((int) rectF.bottom);
+//
+//        int bottom = layout.getLineBaseline(line);
+//        int decent = layout.getLineDescent(line);
+//        int left = layout.getOffsetForHorizontal(line, rectF.left);
+//        int right = layout.getOffsetForHorizontal(line, rectF.right);
+//
+//        float leftX = layout.getPrimaryHorizontal(left);
+//        float rightX = layout.getPrimaryHorizontal(right + 1);
+//        System.out.println(String.format("%s,%s,%s",line,left,right));
+//        canvas.drawLine(leftX, bottom + decent / 2, rightX, bottom + decent / 2, mTextPaint);
         canvas.restore();
     }
 
@@ -148,7 +155,7 @@ public class TxtPage extends View {
     int presstime = 0;
     float X, Y;
 
-    ArrayList<RectF> lines = new ArrayList<>();
+    List<int[]> lines = new ArrayList<>();
 
     RectF rectF = new RectF();
 
@@ -164,20 +171,22 @@ public class TxtPage extends View {
             case MotionEvent.ACTION_MOVE:
                 if (Math.abs(X - event.getX()) < 1.5 && Math.abs(Y - event.getY()) < 1.5)
                     presstime += 1;
-                if (presstime >30) {
+                if (presstime > 30) {
                     getParent().requestDisallowInterceptTouchEvent(true);
                     dx = event.getX();
                     dy = event.getY();
-                    rectF.set(X,Y,dx,dy);
-//                    RectF rectF = new RectF();
-//                    if (rectF.in)
-////                    rectF.union();
-
+                    rectF.set(RectUtils.setRectangle(X, Y, dx, dy, false));
                     postInvalidate();
                 }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+
+                if (presstime > 30) {
+                    lines.add(RectUtils.layoutPosition(rectF, mLayout));
+                    lines = RectUtils.unionRectanges(lines);
+                }
+                rectF.set(0, 0, 0, 0);
                 presstime = 0;
                 getParent().requestDisallowInterceptTouchEvent(false);
                 break;
@@ -195,8 +204,7 @@ public class TxtPage extends View {
         this.mLayout = layout;
         mLineSpacing = layout.getSpacingMultiplier();
         mSpacingExtra = layout.getSpacingAdd();
-        if (isShown())
-            requestLayout();
+        requestLayout();
     }
 
     public void setTextColor(int color) {
