@@ -95,8 +95,9 @@ public class TxtPage extends View {
 
 
 
-        popupWindow = new PopupWindow(200,150);
+        popupWindow = new PopupWindow(300, 250);
         ImageView imageView = new ImageView(getContext());
+        imageView.setBackgroundColor(0xffffff);
         popupWindow.setContentView(imageView);
     }
 
@@ -196,8 +197,10 @@ public class TxtPage extends View {
                     dx = event.getX();
                     dy = event.getY();
 //                    popupWindow.showAtLocation(this, Gravity.TOP,(int)dx,(int)dy);
-                    ((ImageView)popupWindow.getContentView()).setImageBitmap(getBitmap((int)dx - getPaddingLeft(),calculateY((int)dy - getPaddingTop())));
-                    popupWindow.update((int) dx - getPaddingLeft(), calculateY((int) dy - getPaddingTop()), 200, 150);
+                    if (distance > mTouchSlopSquare) {
+                        ((ImageView) popupWindow.getContentView()).setImageBitmap(getBitmap((int) dx - getPaddingLeft(), calculateY((int) dy - getPaddingTop())));
+                        popupWindow.update((int) dx - getPaddingLeft(), calculateY((int) dy - getPaddingTop()), 300,250);
+                    }
                     rectF.set(RectUtils.setRectangle(X - getPaddingLeft(), Y - getPaddingTop(),
                             dx - getPaddingLeft(), dy - getPaddingTop(), false));
                     currentLine = RectUtils.layoutPosition(rectF, mLayout);
@@ -232,7 +235,7 @@ public class TxtPage extends View {
     private Bitmap getBitmap(int x,int y){
         setDrawingCacheEnabled(true);
         Bitmap bitmap = this.getDrawingCache();
-        bitmap = Bitmap.createBitmap(bitmap, x - 100, y - 50, 200, 150);
+        bitmap = Bitmap.createBitmap(bitmap, x-100, y+100, 300, 250);
         setDrawingCacheEnabled(false);
         return bitmap;
     }
