@@ -53,6 +53,11 @@ public class RectUtils {
             dy += 0.1;
         }
 
+        sx = sx < 0 ? 0 : sx;
+        sy = sy < 0 ? 0 : sy;
+        dx = dx < 0 ? 0 : dx;
+        dy = dy < 0 ? 0 : dy;
+
         rectF.set(
                 Math.min(sx, dx),
                 Math.min(sy, dy),
@@ -125,7 +130,7 @@ public class RectUtils {
         int lineEnd = layout.getLineForVertical((int) rectF.bottom);
 
         int characterStart = layout.getOffsetForHorizontal(lineStart, rectF.left);
-        int characterEnd = layout.getOffsetForHorizontal(lineStart, rectF.right);
+        int characterEnd = layout.getOffsetForHorizontal(lineEnd, rectF.right);
 
         return new int[]{lineStart, lineEnd, characterStart, characterEnd};
 

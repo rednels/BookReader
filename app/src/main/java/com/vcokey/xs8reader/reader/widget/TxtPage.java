@@ -3,26 +3,34 @@ package com.vcokey.xs8reader.reader.widget;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.text.DynamicLayout;
+import android.os.Handler;
+import android.os.Message;
 import android.text.Layout;
-import android.text.SpannableStringBuilder;
+import android.text.Spannable;
+import android.text.Spanned;
 import android.text.TextPaint;
+import android.text.style.BackgroundColorSpan;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
+import android.widget.ImageView;
+import android.widget.PopupWindow;
 
 import com.vcokey.xs8reader.reader.util.PageTxtParser;
 import com.vcokey.xs8reader.reader.util.RectUtils;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +58,18 @@ public class TxtPage extends View {
     private int mBackgroudRes;
     private String mText = "";
 
+    private boolean mInLongPress = false;
+
+    private static final int LONG_PRESS = 0X00000001;
+    private static final long LONGPRESS_TIMEOUT = 1000;
+
+    private Handler mHandler;
+    private int touchSlop;
+    private int mTouchSlopSquare;
+
+    private int mWidth;
+    private int mHeight;
+
     public TxtPage(Context context) {
         this(context, null);
     }
@@ -62,13 +82,22 @@ public class TxtPage extends View {
         super(context, attrs, defStyleAttr);
         init(context);
     }
-
-
+    PopupWindow popupWindow;
     private void init(Context context) {
         Log.d(TAG, "TxtPage init");
+        mHandler = new GestureHandler(this);
         mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setStyle(Paint.Style.FILL);
-        mTextPaint.setTypeface(Typeface.createFromAsset(getContext().getAssets(),"fonts/osp.ttf"));
+        mTextPaint.setTypeface(Typeface.createFromAsset(getContext().getAssets(), "fonts/osp.ttf"));
+        final ViewConfiguration configuration = ViewConfiguration.get(context);
+        touchSlop = configuration.getScaledTouchSlop();
+        mTouchSlopSquare = touchSlop * touchSlop;
+
+
+
+        popupWindow = new PopupWindow(200,150);
+        ImageView imageView = new ImageView(getContext());
+        popupWindow.setContentView(imageView);
     }
 
     float dx = 0, dy = 0;
@@ -77,26 +106,25 @@ public class TxtPage extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         mTextPaint.setSubpixelText(true);
+        canvas.drawColor(0xffffff);
         canvas.save();
         canvas.translate(getPaddingLeft(), getPaddingTop());
 
         Path path = new Path();
-        path.moveTo(getPaddingLeft(), getPaddingTop());
-        path.lineTo(100, getPaddingTop());
+        path.moveTo(100, 100);
+        path.lineTo(200, 100);
+
 
         if (mLayout != null) {
             mLayout.draw(canvas, path, mTextPaint, 0);
         }
         mTextPaint.setSubpixelText(true);
-        DynamicLayout layout = new DynamicLayout(mText,
-                mTextPaint, getMeasuredWidth() - getPaddingLeft() - getPaddingRight(), Layout.Alignment.ALIGN_NORMAL,
-                mLineSpacing, mSpacingExtra, false);
-        DisplayMetrics dm = new DisplayMetrics();
-        getDisplay().getMetrics(dm);
-        mTextPaint.setStrokeWidth(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1f, dm));
-//        layout.
-        layout.draw(canvas, path, mTextPaint, 100);
-        Rect rect = new Rect();
+
+//        DynamicLayout layout = new DynamicLayout(ssb,
+//                mTextPaint, getMeasuredWidth() - getPaddingLeft() - getPaddingRight(), Layout.Alignment.ALIGN_NORMAL,
+//                mLineSpacing, mSpacingExtra, false);
+//        layout.draw(canvas);
+//        Rect rect = new Rect();
 //        int bottom = layout.getLineBounds(0, rect); //获取第N行所在的矩形坐标，并返回该行baseline所在的坐标
 //        int b = layout.getLineBottom(0);            //获取第N行，底部位置坐标，和rect.bottom相同
 //        int left = layout.getLineDescent(0) / 2;    //获取baseline和bottom之间的距离
@@ -123,76 +151,90 @@ public class TxtPage extends View {
         canvas.restore();
     }
 
-    SpannableStringBuilder ssb;
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
-        mText = PageTxtParser.parsePager(mTextPaint, mText, width - getPaddingLeft() - getPaddingRight(),
-                PageTxtParser.parseMaxLineCount(mTextPaint, height - getPaddingBottom() - getPaddingTop(),
+        mWidth = MeasureSpec.getSize(widthMeasureSpec) - getPaddingLeft() - getPaddingRight();
+        mHeight = MeasureSpec.getSize(heightMeasureSpec) - getPaddingLeft() - getPaddingRight();
+        mText = PageTxtParser.parsePager(mTextPaint, mText, mWidth,
+                PageTxtParser.parseMaxLineCount(mTextPaint, mHeight,
                         mLineSpacing, mSpacingExtra));
-//        ssb = new SpannableStringBuilder(mText);
-//        BackgroundColorSpan span = new BackgroundColorSpan(0xffff0000);
-//
-//        UnderlineSpan underlineSpan = new UnderlineSpan();
-//        TextAppearanceSpan tas = new TextAppearanceSpan(getContext(),android.R.style.TextAppearance_Small,0xff000000);
-//        ForegroundColorSpan fcs = new ForegroundColorSpan(0xffff0000);
-//        QuoteSpan sts = new QuoteSpan(0xff00ff00);
-//
-//        BulletSpan bulletSpan = new BulletSpan(40,0x0000ff);
-//        SuperscriptSpan superscriptSpan = new SuperscriptSpan();
-//
-//        ScaleXSpan scaleXSpan = new ScaleXSpan(1.5f);
-//        ssb.setSpan(scaleXSpan, 0, 2, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-//        ssb.setSpan(fcs, 0, 10, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-//        ssb.setSpan(underlineSpan, 0, 10, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-
+        mLayout.increaseWidthTo(mWidth);
     }
 
-    int presstime = 0;
     float X, Y;
 
     List<int[]> lines = new ArrayList<>();
 
     RectF rectF = new RectF();
+    int[] currentLine;
+    BackgroundColorSpan span = new BackgroundColorSpan(Color.RED);
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                presstime = 0;
+                mInLongPress = false;
+                mHandler.removeMessages(LONG_PRESS);
+                mHandler.sendEmptyMessageAtTime(LONG_PRESS, event.getDownTime() + LONGPRESS_TIMEOUT);
                 X = event.getX();
                 Y = event.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (Math.abs(X - event.getX()) < 1.5 && Math.abs(Y - event.getY()) < 1.5)
-                    presstime += 1;
-                if (presstime > 30) {
-                    getParent().requestDisallowInterceptTouchEvent(true);
+                final int deltaX = (int) (event.getX() - X);
+                final int deltaY = (int) (event.getY() - Y);
+                int distance = (deltaX * deltaX) + (deltaY * deltaY);
+
+                if (!mInLongPress && distance > mTouchSlopSquare) {
+                    mInLongPress = false;
+                    mHandler.removeMessages(LONG_PRESS);
+                }
+
+                if (mInLongPress) {
                     dx = event.getX();
                     dy = event.getY();
-                    rectF.set(RectUtils.setRectangle(X, Y, dx, dy, false));
-                    postInvalidate();
+//                    popupWindow.showAtLocation(this, Gravity.TOP,(int)dx,(int)dy);
+                    ((ImageView)popupWindow.getContentView()).setImageBitmap(getBitmap((int)dx - getPaddingLeft(),calculateY((int)dy - getPaddingTop())));
+                    popupWindow.update((int) dx - getPaddingLeft(), calculateY((int) dy - getPaddingTop()), 200, 150);
+                    rectF.set(RectUtils.setRectangle(X - getPaddingLeft(), Y - getPaddingTop(),
+                            dx - getPaddingLeft(), dy - getPaddingTop(), false));
+                    currentLine = RectUtils.layoutPosition(rectF, mLayout);
+
+                    ((Spannable) mLayout.getText()).setSpan(span, currentLine[2], currentLine[3], Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                    int start = Math.min(mLayout.getLineTop(currentLine[0]),mLayout.getLineTop(currentLine[1]));
+                    int end = Math.max(mLayout.getLineBottom(currentLine[0]), mLayout.getLineBottom(currentLine[1]));
+                    int left = getLeft();
+                    int right = getRight();
+                    postInvalidate(left, start + getPaddingTop(), right, end + getPaddingTop());
                 }
+
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-
-                if (presstime > 30) {
-                    lines.add(RectUtils.layoutPosition(rectF, mLayout));
+                if (mInLongPress) {
+                    mInLongPress = false;
+                    popupWindow.dismiss();
+                    mHandler.removeMessages(LONG_PRESS);
+                    lines.add(currentLine);
+                    currentLine = null;
                     lines = RectUtils.unionRectanges(lines);
+                    rectF.set(0, 0, 0, 0);
+                    getParent().requestDisallowInterceptTouchEvent(false);
                 }
-                rectF.set(0, 0, 0, 0);
-                presstime = 0;
-                getParent().requestDisallowInterceptTouchEvent(false);
                 break;
         }
 
         return true;
+    }
+
+    private Bitmap getBitmap(int x,int y){
+        setDrawingCacheEnabled(true);
+        Bitmap bitmap = this.getDrawingCache();
+        bitmap = Bitmap.createBitmap(bitmap, x - 100, y - 50, 200, 150);
+        setDrawingCacheEnabled(false);
+        return bitmap;
     }
 
     /**
@@ -244,6 +286,35 @@ public class TxtPage extends View {
 
             requestLayout();
             invalidate();
+        }
+    }
+
+
+    private int calculateY(int y){
+        if (y <= popupWindow.getHeight() + getPaddingTop()){
+//            popupWindow.dismiss();
+            return y + popupWindow.getHeight() + 100;
+        }
+        return y - 100;
+    }
+
+    private class GestureHandler extends Handler {
+        WeakReference<TxtPage> weakReference;
+
+        public GestureHandler(TxtPage page) {
+            weakReference = new WeakReference<>(page);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case LONG_PRESS:
+                    mInLongPress = true;
+                    weakReference.get().getParent().requestDisallowInterceptTouchEvent(true);
+                    popupWindow.showAtLocation((View) weakReference.get().getParent(), Gravity.NO_GRAVITY,
+                            (int)X - getPaddingLeft(), calculateY((int) Y - getPaddingTop()));
+                    break;
+            }
         }
     }
 }
