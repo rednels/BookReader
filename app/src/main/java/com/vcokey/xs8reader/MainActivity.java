@@ -44,9 +44,8 @@ public class MainActivity extends AppCompatActivity {
             paint.setTextSize(TypedValue.applyDimension(
                     TypedValue.COMPLEX_UNIT_SP, 16, getResources().getDisplayMetrics()));
             TxtPage txtPage = (TxtPage) view.findViewById(R.id.book_pager_text);
-            txtPage.setLayout(new LayoutBuilder(sb.toString()).setPaint(paint).setWidth(470)
+            txtPage.setLayout(new LayoutBuilder(sb.toString()).setPaint(paint).setWidth(640)
                     .setSpacingMult(1.5f)
-                    .setAlignment(Layout.Alignment.ALIGN_CENTER)
                     .build());
 //            txtPage.setTextSize(16);
 //            txtPage.setTextColor(Color.BLACK);

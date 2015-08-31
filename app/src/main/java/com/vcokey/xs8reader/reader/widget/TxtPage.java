@@ -3,43 +3,36 @@ package com.vcokey.xs8reader.reader.widget;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Message;
-import android.text.DynamicLayout;
 import android.text.Layout;
 import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.style.BackgroundColorSpan;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.ActionMode;
-import android.view.DragEvent;
-import android.view.GestureDetector;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.ImageView;
+import android.widget.PopupWindow;
 
-import com.vcokey.xs8reader.R;
 import com.vcokey.xs8reader.reader.util.PageTxtParser;
 import com.vcokey.xs8reader.reader.util.RectUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 /**
  * Txt reader widget,not support rich text.
@@ -74,6 +67,9 @@ public class TxtPage extends View {
     private int touchSlop;
     private int mTouchSlopSquare;
 
+    private int mWidth;
+    private int mHeight;
+
     public TxtPage(Context context) {
         this(context, null);
     }
@@ -86,15 +82,7 @@ public class TxtPage extends View {
         super(context, attrs, defStyleAttr);
         init(context);
     }
-
-    final GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
-        public void onLongPress(MotionEvent e) {
-            Log.e("", "Longpress detected");
-//            startDrag(null,null,null,0);
-        }
-
-    });
-
+    PopupWindow popupWindow;
     private void init(Context context) {
         Log.d(TAG, "TxtPage init");
         mHandler = new GestureHandler(this);
@@ -104,6 +92,12 @@ public class TxtPage extends View {
         final ViewConfiguration configuration = ViewConfiguration.get(context);
         touchSlop = configuration.getScaledTouchSlop();
         mTouchSlopSquare = touchSlop * touchSlop;
+
+
+
+        popupWindow = new PopupWindow(200,150);
+        ImageView imageView = new ImageView(getContext());
+        popupWindow.setContentView(imageView);
     }
 
     float dx = 0, dy = 0;
@@ -112,6 +106,7 @@ public class TxtPage extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         mTextPaint.setSubpixelText(true);
+        canvas.drawColor(0xffffff);
         canvas.save();
         canvas.translate(getPaddingLeft(), getPaddingTop());
 
@@ -119,10 +114,12 @@ public class TxtPage extends View {
         path.moveTo(100, 100);
         path.lineTo(200, 100);
 
+
         if (mLayout != null) {
             mLayout.draw(canvas, path, mTextPaint, 0);
         }
         mTextPaint.setSubpixelText(true);
+
 //        DynamicLayout layout = new DynamicLayout(ssb,
 //                mTextPaint, getMeasuredWidth() - getPaddingLeft() - getPaddingRight(), Layout.Alignment.ALIGN_NORMAL,
 //                mLineSpacing, mSpacingExtra, false);
@@ -158,11 +155,12 @@ public class TxtPage extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
-        mText = PageTxtParser.parsePager(mTextPaint, mText, width - getPaddingLeft() - getPaddingRight(),
-                PageTxtParser.parseMaxLineCount(mTextPaint, height - getPaddingBottom() - getPaddingTop(),
+        mWidth = MeasureSpec.getSize(widthMeasureSpec) - getPaddingLeft() - getPaddingRight();
+        mHeight = MeasureSpec.getSize(heightMeasureSpec) - getPaddingLeft() - getPaddingRight();
+        mText = PageTxtParser.parsePager(mTextPaint, mText, mWidth,
+                PageTxtParser.parseMaxLineCount(mTextPaint, mHeight,
                         mLineSpacing, mSpacingExtra));
+        mLayout.increaseWidthTo(mWidth);
     }
 
     float X, Y;
@@ -171,6 +169,7 @@ public class TxtPage extends View {
 
     RectF rectF = new RectF();
     int[] currentLine;
+    BackgroundColorSpan span = new BackgroundColorSpan(Color.RED);
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -181,19 +180,14 @@ public class TxtPage extends View {
                 mHandler.removeMessages(LONG_PRESS);
                 mHandler.sendEmptyMessageAtTime(LONG_PRESS, event.getDownTime() + LONGPRESS_TIMEOUT);
                 X = event.getX();
-                ;
                 Y = event.getY();
-                System.out.println(String.format("down %s:%s", X, Y));
                 break;
             case MotionEvent.ACTION_MOVE:
                 final int deltaX = (int) (event.getX() - X);
                 final int deltaY = (int) (event.getY() - Y);
                 int distance = (deltaX * deltaX) + (deltaY * deltaY);
-                System.out.println(String.format("move %s:%s", event.getX(), event.getY()));
-//                System.out.println(String.format("%s,%s,%s", mInLongPress, distance, mTouchSlopSquare));
 
                 if (!mInLongPress && distance > mTouchSlopSquare) {
-//                    System.out.println("removeMessages");
                     mInLongPress = false;
                     mHandler.removeMessages(LONG_PRESS);
                 }
@@ -201,26 +195,27 @@ public class TxtPage extends View {
                 if (mInLongPress) {
                     dx = event.getX();
                     dy = event.getY();
-                    rectF.set(RectUtils.setRectangle(X-getPaddingLeft(), Y - getPaddingTop(),
+//                    popupWindow.showAtLocation(this, Gravity.TOP,(int)dx,(int)dy);
+                    ((ImageView)popupWindow.getContentView()).setImageBitmap(getBitmap((int)dx - getPaddingLeft(),calculateY((int)dy - getPaddingTop())));
+                    popupWindow.update((int) dx - getPaddingLeft(), calculateY((int) dy - getPaddingTop()), 200, 150);
+                    rectF.set(RectUtils.setRectangle(X - getPaddingLeft(), Y - getPaddingTop(),
                             dx - getPaddingLeft(), dy - getPaddingTop(), false));
                     currentLine = RectUtils.layoutPosition(rectF, mLayout);
-//                    System.out.println(String.format("%s,%s,%s,%s",currentLine[0],currentLine[1],currentLine[2],currentLine[3]));
 
-                    BackgroundColorSpan span = new BackgroundColorSpan(Color.RED);
                     ((Spannable) mLayout.getText()).setSpan(span, currentLine[2], currentLine[3], Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-                    int start = deltaY < 0 ? mLayout.getLineBottom(currentLine[0]) : mLayout.getLineTop(currentLine[0]);
-                    int end = deltaY < 0 ? mLayout.getLineBottom(currentLine[1]) : mLayout.getLineTop(currentLine[1]);
+                    int start = Math.min(mLayout.getLineTop(currentLine[0]),mLayout.getLineTop(currentLine[1]));
+                    int end = Math.max(mLayout.getLineBottom(currentLine[0]), mLayout.getLineBottom(currentLine[1]));
                     int left = getLeft();
                     int right = getRight();
-                    postInvalidate();
+                    postInvalidate(left, start + getPaddingTop(), right, end + getPaddingTop());
                 }
 
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 if (mInLongPress) {
-//                    System.out.println("ACTION_CANCEL");
                     mInLongPress = false;
+                    popupWindow.dismiss();
                     mHandler.removeMessages(LONG_PRESS);
                     lines.add(currentLine);
                     currentLine = null;
@@ -232,6 +227,14 @@ public class TxtPage extends View {
         }
 
         return true;
+    }
+
+    private Bitmap getBitmap(int x,int y){
+        setDrawingCacheEnabled(true);
+        Bitmap bitmap = this.getDrawingCache();
+        bitmap = Bitmap.createBitmap(bitmap, x - 100, y - 50, 200, 150);
+        setDrawingCacheEnabled(false);
+        return bitmap;
     }
 
     /**
@@ -286,7 +289,15 @@ public class TxtPage extends View {
         }
     }
 
-    
+
+    private int calculateY(int y){
+        if (y <= popupWindow.getHeight() + getPaddingTop()){
+//            popupWindow.dismiss();
+            return y + popupWindow.getHeight() + 100;
+        }
+        return y - 100;
+    }
+
     private class GestureHandler extends Handler {
         WeakReference<TxtPage> weakReference;
 
@@ -300,6 +311,8 @@ public class TxtPage extends View {
                 case LONG_PRESS:
                     mInLongPress = true;
                     weakReference.get().getParent().requestDisallowInterceptTouchEvent(true);
+                    popupWindow.showAtLocation((View) weakReference.get().getParent(), Gravity.NO_GRAVITY,
+                            (int)X - getPaddingLeft(), calculateY((int) Y - getPaddingTop()));
                     break;
             }
         }
