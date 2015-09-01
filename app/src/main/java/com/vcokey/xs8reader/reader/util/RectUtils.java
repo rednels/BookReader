@@ -131,8 +131,10 @@ public class RectUtils {
 
         int characterStart = layout.getOffsetForHorizontal(lineStart, rectF.left);
         int characterEnd = layout.getOffsetForHorizontal(lineEnd, rectF.right);
-
-        return new int[]{lineStart, lineEnd, characterStart, characterEnd};
-
+        if (characterStart < characterEnd)
+            return new int[]{lineStart, lineEnd, characterStart, characterEnd};
+        else{
+            return new int[]{lineEnd,lineStart, characterEnd,  characterStart};
+        }
     }
 }

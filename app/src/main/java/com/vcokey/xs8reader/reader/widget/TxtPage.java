@@ -17,6 +17,7 @@ import android.text.Spannable;
 import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.style.BackgroundColorSpan;
+import android.text.style.UnderlineSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -86,7 +87,7 @@ public class TxtPage extends View {
     private void init(Context context) {
         Log.d(TAG, "TxtPage init");
         mHandler = new GestureHandler(this);
-        mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+        mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
         mTextPaint.setStyle(Paint.Style.FILL);
         mTextPaint.setTypeface(Typeface.createFromAsset(getContext().getAssets(), "fonts/osp.ttf"));
         final ViewConfiguration configuration = ViewConfiguration.get(context);
@@ -95,8 +96,10 @@ public class TxtPage extends View {
 
 
 
-        popupWindow = new PopupWindow(200,150);
+        popupWindow = new PopupWindow(200, 100);
         ImageView imageView = new ImageView(getContext());
+        imageView.setBackgroundColor(0xffffff);
+        popupWindow.setBackgroundDrawable(getContext().getResources().getDrawable(android.support.v7.appcompat.R.drawable.abc_switch_thumb_material));
         popupWindow.setContentView(imageView);
     }
 
@@ -160,7 +163,8 @@ public class TxtPage extends View {
         mText = PageTxtParser.parsePager(mTextPaint, mText, mWidth,
                 PageTxtParser.parseMaxLineCount(mTextPaint, mHeight,
                         mLineSpacing, mSpacingExtra));
-        mLayout.increaseWidthTo(mWidth);
+
+//        mLayout.increaseWidthTo(mWidth);
     }
 
     float X, Y;
@@ -169,7 +173,7 @@ public class TxtPage extends View {
 
     RectF rectF = new RectF();
     int[] currentLine;
-    BackgroundColorSpan span = new BackgroundColorSpan(Color.RED);
+    UnderlineSpan span = new UnderlineSpan();
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -195,19 +199,23 @@ public class TxtPage extends View {
                 if (mInLongPress) {
                     dx = event.getX();
                     dy = event.getY();
-//                    popupWindow.showAtLocation(this, Gravity.TOP,(int)dx,(int)dy);
-                    ((ImageView)popupWindow.getContentView()).setImageBitmap(getBitmap((int)dx - getPaddingLeft(),calculateY((int)dy - getPaddingTop())));
-                    popupWindow.update((int) dx - getPaddingLeft(), calculateY((int) dy - getPaddingTop()), 200, 150);
+
+                    rectF.set(X - getPaddingLeft(), Y - getPaddingTop(),
+                            dx - getPaddingLeft(), dy - getPaddingTop());
+                    currentLine = RectUtils.layoutPosition(rectF, mLayout);
                     rectF.set(RectUtils.setRectangle(X - getPaddingLeft(), Y - getPaddingTop(),
                             dx - getPaddingLeft(), dy - getPaddingTop(), false));
-                    currentLine = RectUtils.layoutPosition(rectF, mLayout);
-
+//                    if (distance > mTouchSlopSquare) {
+                        ((ImageView) popupWindow.getContentView()).setImageBitmap(getBitmap((int) dx - getPaddingLeft(), calculateY((int) dy - getPaddingTop())));
+                        popupWindow.update((int) dx - getPaddingLeft(), calculateY((int) dy - getPaddingTop()), 200, 100);
+//                    }
                     ((Spannable) mLayout.getText()).setSpan(span, currentLine[2], currentLine[3], Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                     int start = Math.min(mLayout.getLineTop(currentLine[0]),mLayout.getLineTop(currentLine[1]));
                     int end = Math.max(mLayout.getLineBottom(currentLine[0]), mLayout.getLineBottom(currentLine[1]));
                     int left = getLeft();
                     int right = getRight();
-                    postInvalidate(left, start + getPaddingTop(), right, end + getPaddingTop());
+//                    postInvalidate(left, start + getPaddingTop(), right, end + getPaddingTop());
+                    postInvalidate();
                 }
 
                 break;
@@ -232,7 +240,7 @@ public class TxtPage extends View {
     private Bitmap getBitmap(int x,int y){
         setDrawingCacheEnabled(true);
         Bitmap bitmap = this.getDrawingCache();
-        bitmap = Bitmap.createBitmap(bitmap, x - 100, y - 50, 200, 150);
+        bitmap = Bitmap.createBitmap(bitmap, x-100, y+50, 200, 100);
         setDrawingCacheEnabled(false);
         return bitmap;
     }
