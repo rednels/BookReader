@@ -71,6 +71,9 @@ public class TxtPage extends View {
     private int mWidth;
     private int mHeight;
 
+    private Bitmap mMagnifierBitmap;
+    private Canvas mMagnifierCanvas;
+
     public TxtPage(Context context) {
         this(context, null);
     }
@@ -94,7 +97,16 @@ public class TxtPage extends View {
         touchSlop = configuration.getScaledTouchSlop();
         mTouchSlopSquare = touchSlop * touchSlop;
 
+        post(new Runnable() {
+            @Override
+            public void run() {
+                mMagnifierBitmap = Bitmap.createBitmap(getMeasuredWidth(),getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+                mMagnifierCanvas = new Canvas(mMagnifierBitmap);
+            }
+        });
 
+//        mMagnifierBitmap = Bitmap.createBitmap(200,100, Bitmap.Config.ARGB_8888);
+//        mMagnifierCanvas = new Canvas(mMagnifierBitmap);
 
         popupWindow = new PopupWindow(200, 100);
         ImageView imageView = new ImageView(getContext());
@@ -109,6 +121,7 @@ public class TxtPage extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         mTextPaint.setSubpixelText(true);
+
         canvas.drawColor(0xffffff);
         canvas.save();
         canvas.translate(getPaddingLeft(), getPaddingTop());
@@ -117,40 +130,15 @@ public class TxtPage extends View {
         path.moveTo(100, 100);
         path.lineTo(200, 100);
 
-
         if (mLayout != null) {
             mLayout.draw(canvas, path, mTextPaint, 0);
         }
         mTextPaint.setSubpixelText(true);
 
-//        DynamicLayout layout = new DynamicLayout(ssb,
-//                mTextPaint, getMeasuredWidth() - getPaddingLeft() - getPaddingRight(), Layout.Alignment.ALIGN_NORMAL,
-//                mLineSpacing, mSpacingExtra, false);
-//        layout.draw(canvas);
-//        Rect rect = new Rect();
-//        int bottom = layout.getLineBounds(0, rect); //获取第N行所在的矩形坐标，并返回该行baseline所在的坐标
-//        int b = layout.getLineBottom(0);            //获取第N行，底部位置坐标，和rect.bottom相同
-//        int left = layout.getLineDescent(0) / 2;    //获取baseline和bottom之间的距离
-//        int right = layout.getOffsetForHorizontal(1, 20);    //获取第一行X坐标为20的点所在的字符在字符串中的位置
-//        float a = layout.getPrimaryHorizontal(1);           //获取字符串中第N个字符的左边界坐标
-//        float c = layout.getSecondaryHorizontal(10);        //获取字符串中第N个字符的右边界坐标
-
         for (int[] line : lines) {
             // TODO: 2015/8/30 依次循环画下划线，layout需提前渲染
         }
 
-
-//        int line = layout.getLineForVertical((int) rectF.bottom);
-//
-//        int bottom = layout.getLineBaseline(line);
-//        int decent = layout.getLineDescent(line);
-//        int left = layout.getOffsetForHorizontal(line, rectF.left);
-//        int right = layout.getOffsetForHorizontal(line, rectF.right);
-//
-//        float leftX = layout.getPrimaryHorizontal(left);
-//        float rightX = layout.getPrimaryHorizontal(right + 1);
-//        System.out.println(String.format("%s,%s,%s",line,left,right));
-//        canvas.drawLine(leftX, bottom + decent / 2, rightX, bottom + decent / 2, mTextPaint);
         canvas.restore();
     }
 
@@ -206,6 +194,8 @@ public class TxtPage extends View {
                     rectF.set(RectUtils.setRectangle(X - getPaddingLeft(), Y - getPaddingTop(),
                             dx - getPaddingLeft(), dy - getPaddingTop(), false));
 //                    if (distance > mTouchSlopSquare) {
+
+
                         ((ImageView) popupWindow.getContentView()).setImageBitmap(getBitmap((int) dx - getPaddingLeft(), calculateY((int) dy - getPaddingTop())));
                         popupWindow.update((int) dx - getPaddingLeft(), calculateY((int) dy - getPaddingTop()), 200, 100);
 //                    }

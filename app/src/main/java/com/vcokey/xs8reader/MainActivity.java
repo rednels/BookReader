@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.vcokey.xs8reader.reader.widget.LayoutBuilder;
+import com.vcokey.xs8reader.reader.widget.Magnifier;
 import com.vcokey.xs8reader.reader.widget.TxtPage;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
         setContentView(R.layout.activity_main);
         mBookPager = (ViewPager) findViewById(R.id.reader_book_pager);
         sb = "\u3000\u3000正则表达式的鼻祖或许可一直追溯到科学家对人类神经系统工作原理的早期研究。\n\u3000\u3000美国新泽西州的和出生在美国底特律的这两位神经生理方面的科学家，研究出了一种用数学方式来描述神经网络的新方法，他们创造性地将神经系统中的神经元描述成了小而简单的自动控制元，从而作出了一项伟大的工作革新。\n\u3000\u3000" +
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mBookPager.setAdapter(new BookPagerAdapter());
+
     }
 
 
