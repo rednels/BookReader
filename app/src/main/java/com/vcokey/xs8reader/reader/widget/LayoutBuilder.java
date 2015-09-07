@@ -15,6 +15,7 @@ import android.text.style.BulletSpan;
 import android.text.style.IconMarginSpan;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LineHeightSpan;
+import android.text.style.TabStopSpan;
 import android.util.TypedValue;
 
 /**
@@ -90,7 +91,9 @@ public class LayoutBuilder {
             }
         };
         mText.setSpan(lhs, 0, mText.length() - 1, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-        ParagraphMarginSpan span = new ParagraphMarginSpan(56);
+        TabStopSpan span = new TabStopSpan.Standard(56);
+        mText.setSpan(span, 0, mText.length() - 1, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+//        ParagraphMarginSpan span = new ParagraphMarginSpan(56);
 //        mText.setSpan(span, 0, 172, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
 //        mText.setSpan(span, 172, 393, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
 

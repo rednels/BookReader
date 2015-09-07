@@ -71,9 +71,6 @@ public class TxtPage extends View {
     private int mWidth;
     private int mHeight;
 
-    private Bitmap mMagnifierBitmap;
-    private Canvas mMagnifierCanvas;
-
     public TxtPage(Context context) {
         this(context, null);
     }
@@ -86,7 +83,6 @@ public class TxtPage extends View {
         super(context, attrs, defStyleAttr);
         init(context);
     }
-    PopupWindow popupWindow;
     private void init(Context context) {
         Log.d(TAG, "TxtPage init");
         mHandler = new GestureHandler(this);
@@ -97,22 +93,6 @@ public class TxtPage extends View {
         touchSlop = configuration.getScaledTouchSlop();
         mTouchSlopSquare = touchSlop * touchSlop;
 
-        post(new Runnable() {
-            @Override
-            public void run() {
-                mMagnifierBitmap = Bitmap.createBitmap(getMeasuredWidth(),getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-                mMagnifierCanvas = new Canvas(mMagnifierBitmap);
-            }
-        });
-
-//        mMagnifierBitmap = Bitmap.createBitmap(200,100, Bitmap.Config.ARGB_8888);
-//        mMagnifierCanvas = new Canvas(mMagnifierBitmap);
-
-        popupWindow = new PopupWindow(200, 100);
-        ImageView imageView = new ImageView(getContext());
-        imageView.setBackgroundColor(0xffffff);
-        popupWindow.setBackgroundDrawable(getContext().getResources().getDrawable(android.support.v7.appcompat.R.drawable.abc_switch_thumb_material));
-        popupWindow.setContentView(imageView);
     }
 
     float dx = 0, dy = 0;
@@ -193,12 +173,6 @@ public class TxtPage extends View {
                     currentLine = RectUtils.layoutPosition(rectF, mLayout);
                     rectF.set(RectUtils.setRectangle(X - getPaddingLeft(), Y - getPaddingTop(),
                             dx - getPaddingLeft(), dy - getPaddingTop(), false));
-//                    if (distance > mTouchSlopSquare) {
-
-
-                        ((ImageView) popupWindow.getContentView()).setImageBitmap(getBitmap((int) dx - getPaddingLeft(), calculateY((int) dy - getPaddingTop())));
-                        popupWindow.update((int) dx - getPaddingLeft(), calculateY((int) dy - getPaddingTop()), 200, 100);
-//                    }
                     ((Spannable) mLayout.getText()).setSpan(span, currentLine[2], currentLine[3], Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                     int start = Math.min(mLayout.getLineTop(currentLine[0]),mLayout.getLineTop(currentLine[1]));
                     int end = Math.max(mLayout.getLineBottom(currentLine[0]), mLayout.getLineBottom(currentLine[1]));
@@ -213,7 +187,6 @@ public class TxtPage extends View {
             case MotionEvent.ACTION_CANCEL:
                 if (mInLongPress) {
                     mInLongPress = false;
-                    popupWindow.dismiss();
                     mHandler.removeMessages(LONG_PRESS);
                     lines.add(currentLine);
                     currentLine = null;
@@ -225,14 +198,6 @@ public class TxtPage extends View {
         }
 
         return true;
-    }
-
-    private Bitmap getBitmap(int x,int y){
-        setDrawingCacheEnabled(true);
-        Bitmap bitmap = this.getDrawingCache();
-        bitmap = Bitmap.createBitmap(bitmap, x-100, y+50, 200, 100);
-        setDrawingCacheEnabled(false);
-        return bitmap;
     }
 
     /**
@@ -287,15 +252,6 @@ public class TxtPage extends View {
         }
     }
 
-
-    private int calculateY(int y){
-        if (y <= popupWindow.getHeight() + getPaddingTop()){
-//            popupWindow.dismiss();
-            return y + popupWindow.getHeight() + 100;
-        }
-        return y - 100;
-    }
-
     private class GestureHandler extends Handler {
         WeakReference<TxtPage> weakReference;
 
@@ -309,8 +265,6 @@ public class TxtPage extends View {
                 case LONG_PRESS:
                     mInLongPress = true;
                     weakReference.get().getParent().requestDisallowInterceptTouchEvent(true);
-                    popupWindow.showAtLocation((View) weakReference.get().getParent(), Gravity.NO_GRAVITY,
-                            (int)X - getPaddingLeft(), calculateY((int) Y - getPaddingTop()));
                     break;
             }
         }
