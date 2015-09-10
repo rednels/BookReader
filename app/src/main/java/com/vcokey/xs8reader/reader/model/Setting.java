@@ -9,25 +9,17 @@ public class Setting {
 
     public int nightMode;
     public int fontSize;
-    public int lineSpacing;
+    public float lineSpacing;
     public int flipMode;
     public int simpleMode;
     public int fontColor;
     public int backgroundColor;
-    public int backgroundImg;
+    public String backgroundImg;
     public int backgroundType;
 
-    public Setting(int nightMode, int fontSize, int lineSpacing, int flipMode, int simpleMode, int fontColor, int backgroundColor, int backgroundImg, int backgroundType) {
-        this.nightMode = nightMode;
-        this.fontSize = fontSize;
-        this.lineSpacing = lineSpacing;
-        this.flipMode = flipMode;
-        this.simpleMode = simpleMode;
-        this.fontColor = fontColor;
-        this.backgroundColor = backgroundColor;
-        this.backgroundImg = backgroundImg;
-        this.backgroundType = backgroundType;
-    }
+    public int pagePadding;
+
+    public boolean initial = true;
 
     public Setting() {
         backgroundType = TYPE_BACKGROUND_COLOR;
