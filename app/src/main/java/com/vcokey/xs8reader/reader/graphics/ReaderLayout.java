@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 /**
  * 负责文本正文排版
- *
+ * <p/>
  * Created by hongxiu on 2015/9/10.
  */
 public class ReaderLayout implements Layout {
@@ -32,9 +32,7 @@ public class ReaderLayout implements Layout {
 
     private float mFontWidth;
 
-    private ArrayList<TextLine> preChapter = new ArrayList<>();
-    private ArrayList<TextLine> curChapter = new ArrayList<>();
-    private ArrayList<TextLine> nextChapter = new ArrayList<>();
+    private ArrayList<TextLine> mChapterLines = new ArrayList<>();
 
     public ReaderLayout(String text, int width, int height, TextPaint paint) {
         this.mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -43,7 +41,7 @@ public class ReaderLayout implements Layout {
         this.mText = text;
         this.mWidth = width;
         this.mHeight = height;
-        this.mFontWidth = paint.measureText(" ");
+        this.mFontWidth = paint.measureText("永");
     }
 
     public void setSetting(Context context) {
@@ -60,48 +58,88 @@ public class ReaderLayout implements Layout {
         int position = 0;
         int lineChapterCount = 0;
         Pattern pattern = Pattern.compile("[\r\n]+");
-        chapter.add(new TextLine(true,position));
+        chapter.add(new TextLine(true, position));
         while (position < mText.length()) {
-            int end ;
+            int end;
+            TextLine line;
             //计算每行最大字符位置
             if (position + maxCountInLine > mText.length()) {
                 end = mText.length();
-            }else{
+            } else {
                 end = position + maxCountInLine;
             }
             //首行缩进后修正每行最大行宽，并计算每行最大字符数
             if (position == 0 || mText.substring(position - 1, end).startsWith("\n")) {
-                lineChapterCount = mTextPaint.breakText(this.mText, position, end, true, lineWidth - 8 * mFontWidth, null);
-            }else {
+                lineChapterCount = mTextPaint.breakText(this.mText, position, end, true, lineWidth - 2 * mFontWidth, null);
+            } else {
                 lineChapterCount = mTextPaint.breakText(this.mText, position, end, true, lineWidth, null);
             }
 
             //换行时修正每行最大字符数
-            String sub = mText.substring(position, position + lineChapterCount);
-            TextLine line;
+
+            String sub = mText.substring(position, Math.min(position + lineChapterCount + 1, mText.length()));
+
             Matcher matcher = pattern.matcher(sub);
-            if (matcher.find()){
+            if (matcher.find(1)) {
                 end = position + matcher.start() + 1;
-                line = new TextLine(true,end);
-            }else{
+                line = new TextLine(true, end);
+                chapter.add(line);
+            } else {
                 end = position + lineChapterCount;
-                line = new TextLine(false,end);
+                line = new TextLine(false, end);
+                chapter.add(line);
             }
-            chapter.add(line);
-            position  = end;
+
+            position = end;
         }
     }
 
-    public void measurePage(){
-        measureText(curChapter);
+    /**
+     * 根据设置计算文本分行
+     */
+    public void measureLine() {
+        measureText(mChapterLines);
     }
 
-    public void drawCurPage(Canvas canvas){
-        for (int i = 0; i< 10;i++) {
-            canvas.drawText(mText, curChapter.get(i).position, curChapter.get(i + 1).position, curChapter.get(i).firstLine ? 36 + 64 : 36, i * 48 + 36, mTextPaint);
-            // 0 - 12 true
-            // 12 - 26 false
-            // 26 - 37 false
+    public ArrayList<Integer> mPageIndex = new ArrayList<>();
+    private int mCurrentPage = 1;
+
+    public void measurePage(float height, float bodyHeader,float titleHeight, float bodyFooter){
+        measureLine();
+        mPageIndex.add(0);
+        float bodyHeight =height - bodyHeader - bodyFooter;
+        float fontHeight = getFontHeight();
+        for (int i = 0; i < mChapterLines.size();){
+            int lineCount;
+            if (i == 0){
+                 lineCount = (int) ((bodyHeight - titleHeight )/ fontHeight);
+            }else{
+                lineCount = (int) (bodyHeight / fontHeight);
+            }
+            i += lineCount;
+            mPageIndex.add(lineCount);
+        }
+    }
+
+    float getFontHeight(){
+        return  (mTextPaint.getFontMetricsInt().bottom - mTextPaint.getFontMetricsInt().top)* mSetting.lineSpacing;
+    }
+
+    /**
+     * 2 * {@link #mFontWidth}首行缩进2字符<br />
+     *
+     * @param canvas
+     */
+    public void drawCurPage(Canvas canvas, float textTop) {
+        float fontHeight = getFontHeight();
+
+        int pageLineIndex = mPageIndex.get(mCurrentPage);
+
+        for (int i = 0; i < pageLineIndex; i++) {
+            canvas.drawText(mText, mChapterLines.get(i).position, mChapterLines.get(i + 1).position,
+                    mChapterLines.get(i).firstLine ? mSetting.pagePadding + 2 * mFontWidth : mSetting.pagePadding,
+                    (i + 1) * (fontHeight) + textTop, mTextPaint);
+
         }
     }
 
@@ -116,7 +154,7 @@ public class ReaderLayout implements Layout {
     }
 
     @Override
-    public void drawCurrent(Canvas canvas) {
+    public void drawCurrent(Canvas canvas, float textTop) {
 
     }
 

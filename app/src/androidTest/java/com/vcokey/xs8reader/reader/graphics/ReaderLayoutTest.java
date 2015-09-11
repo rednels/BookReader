@@ -11,6 +11,8 @@ import android.util.TypedValue;
 import java.util.ArrayList;
 
 /**
+ * 测试首行缩进和段落计算是否正确
+ *
  * Created by hongxiu on 2015/9/10.
  */
 public class ReaderLayoutTest extends AndroidTestCase {
@@ -25,7 +27,7 @@ public class ReaderLayoutTest extends AndroidTestCase {
                 "之后一段时间，人们发现可以将这一工作成果应用于其他方面。就把这一成果应用于计算搜索算法的一些早期研究，是 Unix的主要发明人，也就是大名鼎鼎的Unix之父。Unix之父将此符号系统引入编辑器QED，然后是Unix上的编辑器ed，并最终引入grep。在其著作（中文版译作：精通正则表达式，已出到第三版）中对此作了进一步阐述讲解，如果你希望更多了解正则表达式理论和历史，推荐你看看这本书。";
         TextPaint a =new TextPaint(Paint.ANTI_ALIAS_FLAG);
         a.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,16,getContext().getResources().getDisplayMetrics()));
-        layout = new ReaderLayout(sb,540,960,a);
+        layout = new ReaderLayout(sb,720,1280,a);
         layout.setSetting(mContext);
     }
 

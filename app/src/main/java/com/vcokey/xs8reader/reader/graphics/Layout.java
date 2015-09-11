@@ -11,7 +11,7 @@ public interface Layout {
 
     void drawPreview(Canvas canvas);
 
-    void drawCurrent(Canvas canvas);
+    void drawCurrent(Canvas canvas,float textTop);
 
     void drawNext(Canvas canvas);
 

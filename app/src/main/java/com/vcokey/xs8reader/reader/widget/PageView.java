@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.text.TextPaint;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -59,7 +60,6 @@ public class PageView extends View {
 
         dm = getResources().getDisplayMetrics();
         initialize();
-        setLayerType(LAYER_TYPE_SOFTWARE, null);
         mBitmap = Bitmap.createBitmap(dm.widthPixels,dm.heightPixels, Bitmap.Config.ARGB_8888);
         mCanvas = new Canvas(mBitmap);
 
@@ -86,7 +86,10 @@ public class PageView extends View {
         mTextPaint.setTextSize(SettingHelper.obtain(getContext()).fontSize);
         mTextPaint.setColor(SettingHelper.obtain(getContext()).fontColor);
         mTitlePaint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 22, dm));
+        mTextPaint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 17, dm));
         mHeaderPaint.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12, dm));
+
+        mTextPaint.setTypeface(Typeface.MONOSPACE);
 
         mHeaderPaint.setColor(Color.GRAY);
 
@@ -109,23 +112,26 @@ public class PageView extends View {
     protected void onDraw(Canvas canvas) {
         canvas.save();
         //TODO - 绘制背景
-//        int padding = SettingHelper.obtain(getContext()).pagePadding;
-//        mCanvas.drawText(mChapter ? mBookName : mChapterName, padding, padding - mHeaderMetrics.ascent, mHeaderPaint);
-//        float titleHeight = mTitleMetrics.bottom - mTitleMetrics.top;
-//        float headerHeight = mHeaderMetrics.bottom - mHeaderMetrics.top;
-//        float bodyAdd = padding + padding;
-//        if (mChapter){
-//            bodyAdd += padding + titleHeight + headerHeight;
-//            mCanvas.drawText(mChapterName,padding,padding + titleHeight + headerHeight + padding,mTitlePaint );
-//        }
+        int padding = SettingHelper.obtain(getContext()).pagePadding;
+        mCanvas.drawText(mChapter ? mBookName : mChapterName, padding, padding - mHeaderMetrics.ascent, mHeaderPaint);
+        float titleHeight = mTitleMetrics.bottom - mTitleMetrics.top;
+        float headerHeight = mHeaderMetrics.bottom - mHeaderMetrics.top;
+        float bodyAdd = padding + padding;
+        if (mChapter){
+            bodyAdd += padding + titleHeight + headerHeight;
+            mCanvas.drawText(mChapterName,padding,padding + titleHeight + headerHeight + padding,mTitlePaint );
+        }
+//
+//        float bodyTop = bodyAdd + mTextMetrics.bottom - mTextMetrics.top;
+//
 //        mCanvas.drawText("efg哈哈哈哈阿斯蒂芬阿萨德浪费空间阿斯蒂芬阿斯蒂芬"
 //        ,padding + 2*mFontWidth,bodyAdd + mTextMetrics.bottom - mTextMetrics.top,mTextPaint);
 //        mCanvas.drawText("哈哈哈哈阿斯蒂芬阿萨德浪费空间阿斯蒂芬阿斯蒂芬"
 //                , padding, bodyAdd + (mTextMetrics.bottom - mTextMetrics.top) * 2 + 5, mTextPaint);
-//        mCanvas.drawBitmap(batteryBitmap,padding,mHeight - padding * 2,mTextPaint);
-//        canvas.drawBitmap(mBitmap,0,0,null);
-        mLayout.measurePage();
-        mLayout.drawCurPage(mCanvas);
+        mCanvas.drawBitmap(batteryBitmap,padding,mHeight - padding * 2,mTextPaint);
+        canvas.drawBitmap(mBitmap,0,0,null);
+        mLayout.measurePage(mHeight,padding * 2 + headerHeight,padding + titleHeight,padding * 2);
+        mLayout.drawCurPage(mCanvas,bodyAdd);
         canvas.drawBitmap(mBitmap,0,0,null);
     }
 
