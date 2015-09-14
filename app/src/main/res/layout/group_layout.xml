@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.vcokey.xs8reader.reader.view.ReaderPager
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/image1"
+        android:background="#ff336600"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <ImageView
+        android:id="@+id/image2"
+        android:background="#ff330066"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <ImageView
+        android:id="@+id/image3"
+        android:background="#ff0066"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</com.vcokey.xs8reader.reader.view.ReaderPager>

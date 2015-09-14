@@ -132,10 +132,10 @@ public class ReaderLayout implements Layout {
      */
     public void drawCurPage(Canvas canvas, float textTop) {
         float fontHeight = getFontHeight();
-
+        int pageLineStart = mPageIndex.get(mCurrentPage - 1);
         int pageLineIndex = mPageIndex.get(mCurrentPage);
 
-        for (int i = 0; i < pageLineIndex; i++) {
+        for (int i = pageLineStart; i < pageLineIndex; i++) {
             canvas.drawText(mText, mChapterLines.get(i).position, mChapterLines.get(i + 1).position,
                     mChapterLines.get(i).firstLine ? mSetting.pagePadding + 2 * mFontWidth : mSetting.pagePadding,
                     (i + 1) * (fontHeight) + textTop, mTextPaint);

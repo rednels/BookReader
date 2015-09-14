@@ -63,32 +63,33 @@ public class MainActivity extends AppCompatActivity {
 //        }
 
 //        mBookPager.setAdapter(new BookPagerAdapter());
-        PageView view = new PageView(this);
-        view.setChapterInfo("金粉世家","第一章 转角邂逅",true);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        setContentView(view);
+//        PageView view = new PageView(this);
+//        view.setChapterInfo("金粉世家","第一章 转角邂逅",true);
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+//        setContentView(view);
+        setContentView(R.layout.group_layout);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-            if ((getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) == 0) {
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-//                getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
-//                getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-            } else {
-                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            }
-            if ((getWindow().getAttributes().flags & (WindowManager.LayoutParams.FLAG_FULLSCREEN | 0x04)) == 0){
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | 0x04);
-            }
-        }
-        return super.onTouchEvent(event);
-    }
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+//            if ((getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) == 0) {
+//                getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+////                getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
+////                getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+//            } else {
+//                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//            }
+//            if ((getWindow().getAttributes().flags & (WindowManager.LayoutParams.FLAG_FULLSCREEN | 0x04)) == 0){
+//                getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | 0x04);
+//            }
+//        }
+//        return super.onTouchEvent(event);
+//    }
 
     ArrayList<View> list = new ArrayList<>();
 
