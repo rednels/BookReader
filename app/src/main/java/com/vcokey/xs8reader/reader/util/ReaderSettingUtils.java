@@ -31,7 +31,7 @@ public class ReaderSettingUtils {
     private static final int DEFAULT_FONT_SIZE = 16;    //16SP
     private static final int DEFAULT_FONT_COLOR = Color.BLACK;
     private static final int DEFAULT_BACKGROUND_COLOR = Color.WHITE;
-    private static final float DEFAULT_LINE_SPACING = 1.2f;
+    private static final float DEFAULT_LINE_SPACING = 1.5f;
     //default setting value end
 
     /**

@@ -30,7 +30,8 @@ public class ReaderLayout implements Layout {
     private int mWidth;
     private int mHeight;
 
-    private float mFontWidth;
+    private float mFontWidth;   //默认字体宽度为一个拉丁字符宽度
+    private float mIndentWith; //首行缩进2个字符宽度
 
     private ArrayList<TextLine> mChapterLines = new ArrayList<>();
 
@@ -41,7 +42,8 @@ public class ReaderLayout implements Layout {
         this.mText = text;
         this.mWidth = width;
         this.mHeight = height;
-        this.mFontWidth = paint.measureText("永");
+        this.mFontWidth = paint.measureText("a");
+        this.mIndentWith = 2 * paint.measureText("永");
     }
 
     public void setSetting(Context context) {
@@ -70,7 +72,7 @@ public class ReaderLayout implements Layout {
             }
             //首行缩进后修正每行最大行宽，并计算每行最大字符数
             if (position == 0 || mText.substring(position - 1, end).startsWith("\n")) {
-                lineChapterCount = mTextPaint.breakText(this.mText, position, end, true, lineWidth - 2 * mFontWidth, null);
+                lineChapterCount = mTextPaint.breakText(this.mText, position, end, true, lineWidth - mIndentWith, null);
             } else {
                 lineChapterCount = mTextPaint.breakText(this.mText, position, end, true, lineWidth, null);
             }
@@ -95,12 +97,21 @@ public class ReaderLayout implements Layout {
     }
 
     /**
-     * 根据设置计算文本分行
+     * 根据设置计算文本分行,
+     * 0----17  第一行
+     * 17----38 第二行
+     * 38----50 第三行
      */
     public void measureLine() {
         measureText(mChapterLines);
     }
 
+    /**
+     * 每页开头的行号
+     * 第一页 0
+     * 第二页 18
+     * 第三页 37
+     */
     public ArrayList<Integer> mPageIndex = new ArrayList<>();
     private int mCurrentPage = 1;
 
@@ -113,11 +124,16 @@ public class ReaderLayout implements Layout {
             int lineCount;
             if (i == 0){
                  lineCount = (int) ((bodyHeight - titleHeight )/ fontHeight);
-            }else{
+            }else {
                 lineCount = (int) (bodyHeight / fontHeight);
             }
             i += lineCount;
-            mPageIndex.add(lineCount);
+
+            if (i >= mChapterLines.size()) {
+                mPageIndex.add(mChapterLines.size() - 1);
+            } else {
+                mPageIndex.add(i);
+            }
         }
     }
 
@@ -137,7 +153,7 @@ public class ReaderLayout implements Layout {
 
         for (int i = pageLineStart; i < pageLineIndex; i++) {
             canvas.drawText(mText, mChapterLines.get(i).position, mChapterLines.get(i + 1).position,
-                    mChapterLines.get(i).firstLine ? mSetting.pagePadding + 2 * mFontWidth : mSetting.pagePadding,
+                    mChapterLines.get(i).firstLine ? mSetting.pagePadding + mIndentWith : mSetting.pagePadding,
                     (i + 1) * (fontHeight) + textTop, mTextPaint);
 
         }
@@ -155,13 +171,27 @@ public class ReaderLayout implements Layout {
 
     @Override
     public void drawCurrent(Canvas canvas, float textTop) {
-
+        drawCurPage(canvas,textTop);
     }
 
     @Override
     public void drawNext(Canvas canvas) {
-
     }
 
+    public void drawPage(Canvas canvas, float textTop, int position){
+        if (position < 1){
+            position = 1;
+        }
+        float fontHeight = getFontHeight();
+        int pageLineStart = mPageIndex.get(position - 1);
+        int pageLineIndex = mPageIndex.get(position);
+
+        for (int i = pageLineStart; i < pageLineIndex; i++) {
+            canvas.drawText(mText, mChapterLines.get(i).position, mChapterLines.get(i + 1).position,
+                    mChapterLines.get(i).firstLine ? mSetting.pagePadding + mIndentWith : mSetting.pagePadding,
+                    (i - pageLineStart + 1) * (fontHeight) + textTop, mTextPaint);
+
+        }
+    }
 
 }
